@@ -1,6 +1,6 @@
 #include <stdio.h> // понадобится могу ввести и другую библиотеку но этой хватило
 #include <unistd.h>
-#include <io.h> // для filezize.
+
 
 int main() {
 char users_file_name[256]; // создал массив данных из 256 символов
@@ -32,7 +32,7 @@ scanf("%s", &users_file_name);
       printf("     sucesfull    \n ");
     int filedes;
     filedes = fileno(fp); // одновременно приравнял выход функции fileno к filedes и запустил функцию, которая вернет файловый дескриптор.
-    printf("Ur file descriptor:        %d\n", filedes); // filedes - файловй дескриптор.
+    printf("Ur file descriptor:        %d\n", filedes); // filedes - файловый дескриптор.
   
    n_bytes_read = read(filedes, buffer, 600);
     
