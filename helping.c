@@ -10,7 +10,7 @@ ssize_t n_bytes_read;
 
 
 printf("the name of your file: "); // прошу пользователя назвать свой файл чтобы программка открыла его
-scanf("%s", &users_file_name);
+scanf("%s", users_file_name);
 
 
       printf("%s! process was ended ", users_file_name); // тут я впишу название файлика и рядом с ним будет отчет об успехе или провале
