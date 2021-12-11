@@ -3,14 +3,14 @@
 
 
 int main() {
-char users_file_name[256]; // создал массив данных из 256 символов
+char users_file_name[256]; 
 char buffer[600];
 ssize_t n_bytes_read;
 
 
 
 printf("the name of your file: "); // прошу пользователя назвать свой файл чтобы программка открыла его
-scanf("%s", &users_file_name);
+scanf("%s", users_file_name);
 
 
       printf("%s! process was ended ", users_file_name); // тут я впишу название файлика и рядом с ним будет отчет об успехе или провале
@@ -34,7 +34,7 @@ scanf("%s", &users_file_name);
     filedes = fileno(fp); // одновременно приравнял выход функции fileno к filedes и запустил функцию, которая вернет файловый дескриптор.
     printf("Ur file descriptor:        %d\n", filedes); // filedes - файловый дескриптор.
   
-   n_bytes_read = read(filedes, buffer, 600);
+    n_bytes_read = read(filedes, buffer, 600);
     
     if(n_bytes_read == -1)
      printf("cannot read this file.\n");
@@ -44,7 +44,7 @@ scanf("%s", &users_file_name);
      printf("file readed sucesfully\n");
       
     
-      printf(" Readed bytes count :        %d\n", n_bytes_read);
+      printf(" Readed bytes count :        %ld\n", n_bytes_read);
 
        printf("%s\n", buffer);        // распечатал содержимое буфера
 
