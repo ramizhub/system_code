@@ -37,17 +37,31 @@ int main() {
     int filedes;
     filedes = fileno(fp); // filedes accepted fileno return vallue  fileno -> filedes 
     printf("Ur file descriptor:        %d\n", filedes); // filedes - file descriptor
+    
+
+
+    if( (n_bytes_read = read(filedes, buffer, 600)) < 600 )  
+       printf("Readed bytes count : %ld", n_bytes_read);
+    else 
+    {
     while( (n_bytes_read = read(filedes, buffer, 600)) == 600 )
     {
       printf("%s", buffer);
       summa = summa + n_bytes_read;
+      continue;
     }
-    printf("\n%ld\n", summa);
+    }
+      if(n_bytes_read < 600)
+      summa = summa + n_bytes_read;
+      
+
+    printf("\n");
+    printf("Readed bytes count: ");
+    printf("%ld\n", summa);
     if (fclose(fp) == 0) 
         printf("\nfile closed\n");
     else
         printf("closing error\n");
-
 
 
    // after report on opening the program there would be report on closing
