@@ -31,9 +31,9 @@ int main() {
     
      
     if(fp == NULL)        // fp - file pointer
-    printf("  unsucesfull     \n ");
+        printf("  unsucesfull     \n ");
     else 
-    printf("     sucesfull    \n ");
+        printf("     sucesfull    \n ");
     
     int filedes;
     filedes = fileno(fp); // filedes accepted fileno return vallue  fileno -> filedes 
@@ -42,30 +42,27 @@ int main() {
 
     if( (n_bytes_read = read(filedes, buffer, 600)) < 600 )
     {
-    printf("\n%s\n", buffer);  
-    printf("Readed bytes count : %ld", n_bytes_read);
-    }
-
-    else
-    {
-    while( (n_bytes_read = read(filedes, buffer, 600)) == 600 )
-    {
-    printf("%s", buffer);
-    summa = summa + n_bytes_read;
-    }
-    if(n_bytes_read < 600)
-    summa = summa + n_bytes_read;
-    
-    printf("\n");
-    printf("Readed bytes count: ");
-    printf("%ld\n", summa);
+        printf("\n%s\n", buffer);  
+        printf("Readed bytes count : %ld", n_bytes_read);
+    } else {
+        while( (n_bytes_read = read(filedes, buffer, 600)) == 600 )
+        {
+            printf("%s", buffer);
+            summa = summa + n_bytes_read;
+        }
+        if(n_bytes_read < 600)
+            summa = summa + n_bytes_read;
+        
+        printf("\n");
+        printf("Readed bytes count: ");
+        printf("%ld\n", summa);
     }
     
     
     if (fclose(fp) == 0) 
-    printf("\nfile closed\n");
+        printf("\nfile closed\n");
     else
-    printf("closing error\n");
+        printf("closing error\n");
 
 
    // after report on opening the program there would be report on closing
