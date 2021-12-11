@@ -1,72 +1,73 @@
-#include <stdio.h> // понадобится могу ввести и другую библиотеку но этой хватило
+#include <stdio.h> 
 #include <unistd.h>
 
 
 int main() {
 
-    char users_file_name[256]; // создал массив данных из 256 символов
+    char users_file_name[256]; // 256 characters massiv
     char buffer[600];
     ssize_t n_bytes_read;
+    ssize_t n_bytes_read1;
+    ssize_t n_bytes_read2;
+    ssize_t n_bytes_read3;
+    
+    
 
-
-
-    printf("the name of your file: "); // прошу пользователя назвать свой файл чтобы программка открыла его
+    printf("the name of your file: "); // i ask user the name of his file
     scanf("%s", users_file_name);
 
 
-    printf("%s! process was ended ", users_file_name); // тут я впишу название файлика и рядом с ним будет отчет об успехе или провале
+    printf("%s! process was ended ", users_file_name); // there would be name of his file and sucesfull/unsucesfull
     // FILE *fopen(const char *restrict pathname, const char *restrict mode);
         
-    FILE *fp = fopen( users_file_name ,  "r"); // создал указатель и открыл файл
+    FILE *fp = fopen( users_file_name ,  "r"); // created file pointer *fp
     
     long size;
  
     
 
-    /* так как функция fopen при успехе программки вернет мне указатель, а при неуспешности выполнения 
-     *вернет NULL, я указал в условии именно это 
-     */
-    /* этот NUll переводится как ничто, при ошибках с нахождением файла он указывает на ничто, ведь
-     * он обязан отправить нам указатель. 
-     */
-    if(fp == NULL)    // fp - указатель на файл.
+    // fopen returns file pointer if there were no problems
+     
+     
+    // NULL is nothing and fopen returns pointer to NULL when there is a problem
+    
+     
+    if(fp == NULL)        // fp - file pointer
         printf("  unsucesfull     \n ");
     else 
         printf("     sucesfull    \n ");
     int filedes;
-    filedes = fileno(fp); // одновременно приравнял выход функции fileno к filedes и запустил функцию, которая вернет файловый дескриптор.
-    printf("Ur file descriptor:        %d\n", filedes); // filedes - файловый дескриптор.
-  
-    n_bytes_read = read(filedes, buffer, 600);
+    filedes = fileno(fp); // filedes accepted fileno return vallue  fileno -> filedes 
+    printf("Ur file descriptor:        %d\n", filedes); // filedes - file descriptor
+    while( (n_bytes_read = read(filedes, buffer, 600)) == 600 )
+    {
+     printf("%s", buffer);   
+       while( (n_bytes_read1 = read(filedes, buffer, 600)) == 600 )
+       {
+       printf("%s", buffer);
+          while( (n_bytes_read2 = read(filedes, buffer, 600)) == 600 )
+          {  
+             printf("%s", buffer);
+             n_bytes_read3 = read(filedes, buffer, 600);
+             printf("%s", buffer);
+             goto print;
+          }
+       }
+    }
+    print: printf("\n Readed bytes count : %ld", n_bytes_read + n_bytes_read1 + n_bytes_read2 + n_bytes_read3);
     
-    if(n_bytes_read == -1)
-        printf("cannot read this file.\n");
-    else if(n_bytes_read < 600) 
-        printf("not all bytes were read\n");
-    else  
-        printf("file readed sucesfully\n");
-      
-    
-      printf(" Readed bytes count :        %ld\n", n_bytes_read);
-
-    printf("%s\n", buffer);        // распечатал содержимое буфера
-
-
-
-    if (fclose(fp) == 0) /* моей ошибкой до этого было то, что я приравнивал сам указатель,
-                          * а приравнивать нужно всю функцию вместе с указателем в аргументе и тогда все заработает корректно 
-                          */
+    if (fclose(fp) == 0) 
         printf("\nfile closed\n");
     else
         printf("closing error\n");
 
 
 
-   // рядом с отчетом об успехе или неудачи при открытии файла сразу будет отчет о закрытии  
+   // after report on opening the program there would be report on closing
    return 0;
 }
 
 
 
-// int fileno(FILE *stream) возвращает нам файловый дескриптор и этот файловый дескриптор всегда положительное число 
-// эта функция в случае неудачи вернет нам -1.
+// int fileno(FILE *stream) returns file descriptor and file descriptor is always a positive number 
+// in case of error he will return -1
