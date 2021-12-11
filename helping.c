@@ -7,9 +7,7 @@ int main() {
     char users_file_name[256]; // 256 characters massiv
     char buffer[600];
     ssize_t n_bytes_read;
-    ssize_t n_bytes_read1;
-    ssize_t n_bytes_read2;
-    ssize_t n_bytes_read3;
+    ssize_t summa = 0;
     
     
 
@@ -41,21 +39,10 @@ int main() {
     printf("Ur file descriptor:        %d\n", filedes); // filedes - file descriptor
     while( (n_bytes_read = read(filedes, buffer, 600)) == 600 )
     {
-     printf("%s", buffer);   
-       while( (n_bytes_read1 = read(filedes, buffer, 600)) == 600 )
-       {
-       printf("%s", buffer);
-          while( (n_bytes_read2 = read(filedes, buffer, 600)) == 600 )
-          {  
-             printf("%s", buffer);
-             n_bytes_read3 = read(filedes, buffer, 600);
-             printf("%s", buffer);
-             goto print;
-          }
-       }
+      printf("%s", buffer);
+      summa = summa + n_bytes_read;
     }
-    print: printf("\n Readed bytes count : %ld", n_bytes_read + n_bytes_read1 + n_bytes_read2 + n_bytes_read3);
-    
+    printf("\n%ld\n", summa);
     if (fclose(fp) == 0) 
         printf("\nfile closed\n");
     else
