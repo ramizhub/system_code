@@ -38,21 +38,14 @@ int main() {
     int filedes;
     filedes = fileno(fp); // filedes accepted fileno return vallue  fileno -> filedes 
     printf("Ur file descriptor:        %d\n", filedes); // filedes - file descriptor
-    
+
     while( (n_bytes_read = read(filedes, buffer, 600)) != 0 )
     {
-        if(n_bytes_read < 600)
-        {   
-        printf("%s", buffer);        
-        summa = summa + n_bytes_read;
-        printf("\n%ld - R E A D E D bytes count.\n", summa);
-        break;
-        } else if(n_bytes_read == 600)
-          {
-          printf("%s", buffer); 
-          summa = summa + n_bytes_read;     
-          } 
-    }       
+      summa = summa + n_bytes_read; 
+      printf("%s", buffer);
+    }
+    printf("\nReaded bytes count:  %ld\n", summa); 
+
 
     if (fclose(fp) == 0) 
         printf("\nfile closed\n");
