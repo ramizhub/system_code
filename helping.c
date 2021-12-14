@@ -20,8 +20,7 @@ int main() {
         
     FILE *fp = fopen( users_file_name ,  "r");         // created file pointer *fp
     
-    long size;
- 
+    
     
 
     // fopen returns file pointer if there were no problems
