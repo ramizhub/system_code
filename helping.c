@@ -2,64 +2,75 @@
 #include <unistd.h>
 
 
-int main() {
+int main(int argc, char *argv[])               // (int) argument count.   (char *) argv[] argument values
+{    
 
-    char users_file_name[256];    // 256 characters massiv
-    char buffer[601];
+  if(argc != 2)                                // in this program i need 2 arguments in command line: function's and file's names.
+    { 
+       printf("Please, enter the name of function: %s  and after the space button print ur filename", argv[1] ); 
+       return 1;                                // evacuation from my program
+    }
+  
+  
+
+    char buffer[601];                          // element with 600 index will be '\0'
     ssize_t n_bytes_read;
     ssize_t summa = 0;
     
+
+    printf("%s is opening. Waiting ...\n", argv[1]);  
     
-
-    printf("the name of your file: ");                 // i ask user the name of his file
-    scanf("%s", users_file_name);
-
-
-    printf("%s! process was ended ", users_file_name); // there would be name of his file and sucesfull/unsucesfull
-    // FILE *fopen(const char *restrict pathname, const char *restrict mode);
         
-    FILE *fp = fopen( users_file_name ,  "r");         // created file pointer *fp
+    FILE *fp = fopen( argv[1] ,  "r");         // created file pointer *fp
     
-    long size;
+    // FILE *fopen(const char *restrict pathname, const char *restrict mode);
  
-    
-
     // fopen returns file pointer if there were no problems
-     
-     
+         
     // NULL is nothing and fopen returns pointer to NULL when there is a problem
     
      
-    if(fp == NULL)                // fp - file pointer
-        printf("  unsucesfull     \n ");
+    if(fp == NULL)                             // fp - file pointer
+    {                
+       printf("I can't open this file...\n");
+       perror("Reason: ");
+    }
     else 
-        printf("     sucesfull    \n ");
+    {
+       printf("\nthe opening was successful\n");
+    
     
     int filedes;
-    filedes = fileno(fp);         // filedes accepted fileno return vallue  fileno -> filedes 
+    filedes = fileno(fp);                      // filedes accepted fileno return vallue  fileno -> filedes 
     printf("Ur file descriptor:        %d\n", filedes); // filedes - file descriptor
-
+    
+    
+    
     while( (n_bytes_read = read(filedes, buffer, 600)) != 0 )
+    
     {
-      summa = summa + n_bytes_read; 
-      buffer[n_bytes_read] = '\0';
-      printf("%s", buffer);       // printf displays everything before NULL
+       summa = summa + n_bytes_read; 
+       buffer[n_bytes_read] = '\0';
+       printf("%s", buffer);                    // printf displays everything before NULL
     }
+    
     printf("\nReaded bytes count:  %ld\n", summa); 
 
 
     if (fclose(fp) == 0) 
-        printf("\nfile closed\n");
+       printf("File closed succesfully.\n");
     else
-        printf("closing error\n");
+       printf("An error occurred while closing the file.\n");
 
 
    // after report on opening the program there would be report on closing
        return 0;
 
+    }
+    
 }
 
 
 
-// int fileno(FILE *stream) returns file descriptor and file descriptor is always a positive number 
-// in case of error he will return -1
+   // int fileno(FILE *stream) returns file descriptor and file descriptor is always a positive number 
+   // in case of error he will return -1
