@@ -59,10 +59,12 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
 
 
     if (fclose(fp) == 0) 
-       printf("File closed succesfully.\n");
-       return 1;
+       printf("File closed sucesfully.");
     else
-       printf("An error occurred while closing the file.\n");
+       {
+         printf("File cant be closed.\n");
+         return 1;
+       }
 
 
    // after report on opening the program there would be report on closing
