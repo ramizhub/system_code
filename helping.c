@@ -34,6 +34,7 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
     {                
        printf("I can't open this file...\n");
        perror("Reason: ");
+       return 1;
     }
     else 
     {
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
 
     if (fclose(fp) == 0) 
        printf("File closed succesfully.\n");
+       return 1;
     else
        printf("An error occurred while closing the file.\n");
 
