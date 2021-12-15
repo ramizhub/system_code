@@ -15,7 +15,7 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
 
     char buffer[601];                          // element with 600 index will be '\0'
     ssize_t n_bytes_read;
-    ssize_t summa = 0;
+    
     
 
     printf("%s is opening. Waiting ...\n", argv[1]);  
@@ -47,20 +47,19 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
     
     while( (n_bytes_read = read(filedes, buffer, 600)) != 0 )
     
-    {
-       summa = summa + n_bytes_read; 
+    { 
        buffer[n_bytes_read] = '\0';
        printf("%s", buffer);                    // printf displays everything before NULL
     }
     
-    printf("\nReaded bytes count:  %ld\n", summa); 
-
+     
 
     if(fclose(fp) != 0)
     {
       puts("file can't be closed");
       return 1;
     }
+    putchar('\n');
     puts("File closed succesfully");
 
    // after report on opening the program there would be report on closing
