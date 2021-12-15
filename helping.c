@@ -54,16 +54,16 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
     
      
 
-    if(fclose(fp) != 0)
+    if(fclose(fp) == EOF)
     {
-      puts("file can't be closed");
+      perror("Could not close file! Reason: ");
       return 1;
     }
     putchar('\n');
-    puts("File closed succesfully");
-
-   // after report on opening the program there would be report on closing
-       return 0;
+    puts("File was closed succesfully");  
+    
+    // after report on opening the program there would be report on closing
+    return 0;
 
     
 }
