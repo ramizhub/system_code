@@ -32,16 +32,16 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
      
     if(fp == NULL)                             // fp - file pointer
     {                
-       printf("I can't open this file...\n");
-       perror("Reason: ");
+       puts("I can't open this one...\n");
+       puts("Reason: ");
        return 1;
     }
-    printf("\nthe opening was successful\n");
+    puts("\nOpening ended succesfully\n");
     
     
     int filedes;
     filedes = fileno(fp);                      // filedes accepted fileno return vallue  fileno -> filedes 
-    printf("Ur file descriptor:        %d\n", filedes); // filedes - file descriptor
+    printf("Ur file descriptor: %d\n", filedes); // filedes - file descriptor
     
     
     
@@ -56,14 +56,12 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
     printf("\nReaded bytes count:  %ld\n", summa); 
 
 
-    if (fclose(fp) == 0) 
-       puts("File closed sucesfully.");
-    else
-       {
-         printf("File cant be closed.\n");
-         return 1;
-       }
-
+    if(fclose(fp) != 0)
+    {
+      puts("file can't be closed");
+      return 1;
+    }
+    puts("File closed succesfully");
 
    // after report on opening the program there would be report on closing
        return 0;
