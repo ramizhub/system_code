@@ -7,7 +7,7 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
 
   if(argc != 2)                                // in this program i need 2 arguments in command line: function's and file's names.
     { 
-       printf("Please, enter the name of function: %s  and after the space button print ur filename", argv[1] ); 
+       printf("Usage: %s file_name_to_read\n", argv[0] ); 
        return 1;                                // evacuation from my program
     }
   
