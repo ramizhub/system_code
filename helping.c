@@ -59,8 +59,6 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
       perror("Could not close file! Reason: ");
       return 1;
     }
-    putchar('\n');
-    puts("File was closed succesfully");  
     
     // after report on opening the program there would be report on closing
     return 0;
