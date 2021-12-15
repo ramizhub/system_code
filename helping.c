@@ -57,7 +57,7 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
 
 
     if (fclose(fp) == 0) 
-       printf("File closed sucesfully.");
+       puts("File closed sucesfully.");
     else
        {
          printf("File cant be closed.\n");
