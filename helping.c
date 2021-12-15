@@ -36,9 +36,7 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
        perror("Reason: ");
        return 1;
     }
-    else 
-    {
-       printf("\nthe opening was successful\n");
+    printf("\nthe opening was successful\n");
     
     
     int filedes;
@@ -70,7 +68,6 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
    // after report on opening the program there would be report on closing
        return 0;
 
-    }
     
 }
 
