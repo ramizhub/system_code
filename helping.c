@@ -32,11 +32,11 @@ int main(int argc, char *argv[])               // (int) argument count.   (char 
      
     if(fp == NULL)                             // fp - file pointer
     {                
-       puts("I can't open this one...\n");
+       puts("I can't open this one...");
        puts("Reason: ");
        return 1;
     }
-    puts("\nOpening ended succesfully\n");
+    puts("Opening ended succesfully");
     
     
     int filedes;
