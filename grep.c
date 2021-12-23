@@ -10,7 +10,7 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
     if(argc != 3)                                           // argCount should be three. the condition is not met - output usage
     {  
       printf("1Usage: %s string filename", argv[0]);        
-      return 1;                                             // termination
+      return 2;                                             // termination
     }
 
     
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
     if(fpointer == NULL)                                    // null pointer returned if the program can't open file
     {
       perror("Could not open this file! Reason:  ");        // perror produces a message and describes the reasons
-      return 1;                                             // termination
+      return 2;                                             // termination
     }
 
       
@@ -35,6 +35,7 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
 
 
     _Bool word_is_near = false;
+    _Bool found_word = false;
     
     while( (n_bytes_read = 
     read(file_descriptor, buffer, n_word_size)) != 0 )      // usually reads n_word_size bytes in buffer. max.size of buffer is n_word_size too
@@ -44,15 +45,17 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
       for(int index = 0; index < n_bytes_read; index++)     // for loop. every iteration here checks every byte of buffer. 
       {   
         
-        if(n_same_bytes == n_word_size && word_is_near)                     // if the character is not the last in the checking of for_loop and the word is found, it will appear here
+        if(n_same_bytes == n_word_size && word_is_near)     // if the character is not the last in the checking of for_loop and the word is found, it will appear here
         {    
           printf("%5s\n", argv[1]);                         // print this word with new line character.
           word_is_near = false;                             // user's word is far from this character
           n_same_bytes = 0;                                 // looking for a new word again thanks to this variable
+          found_word = true;                                // i need this information after loops' endings
         }
 
         
-        else if(buffer[index] == our_character  && word_is_near )             // character is needed character's copy and we must to skip it's checking
+        else if(buffer[index] == our_character 
+        && word_is_near )                                   // character is needed character's copy and we must to skip it's checking
           continue;
         
             
@@ -78,16 +81,20 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
         printf("%5s\n", argv[1]);                           // print this word with new line character 
         word_is_near = false;                               // user's word is far from this character
         n_same_bytes = 0;                                   // looking for a new word again thanks to this variable
+        found_word = true;                                  // need this information after loops' endings
       } 
     
     }
 
+    if(!found_word)                                         // if the required construction was not found
+      return 1;                                             // program returns 1
 
     if(fclose(fpointer) != 0)                               // if 0 returned it tells about error in closing                    
     { 
       perror("Could not close this one! Reason: ");         // perror produces a message and describes the reasons
-      return 1;
+      return 2;
     }
-
-
+       
+    
+ 
 }
