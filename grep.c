@@ -80,7 +80,7 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
 
     if(fclose(fpointer) != 0)                               // if 0 returned it tells about error in closing                    
     { 
-      perror("Could not close this one! Reason: ");         // // perror produces a message and describes the reasons
+      perror("Could not close this one! Reason: ");         // perror produces a message and describes the reasons
       return 1;
     }
 
