@@ -33,7 +33,8 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
     char our_character;                                     // this variable is needed to memorize one single desired character and avoid reprocessing
 
     
-    while( (n_bytes_read = read(file_descriptor, buffer, n_word_size)) != 0 )   // usually reads n_word_size bytes in buffer. max.size of buffer is n_word_size too
+    while( (n_bytes_read = 
+    read(file_descriptor, buffer, n_word_size)) != 0 )      // usually reads n_word_size bytes in buffer. max.size of buffer is n_word_size too
     {
       
       
