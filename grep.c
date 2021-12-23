@@ -48,7 +48,7 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
         }
 
         
-        if(buffer[index] == our_character)                  // character is needed character's copy and we must to skip it's checking
+        else if(buffer[index] == our_character)             // character is needed character's copy and we must to skip it's checking
           continue;
         
             
