@@ -85,6 +85,8 @@ int main(int argc, char *argv[])                            // 3    ./a.out user
         perror("Could not close this one! Reason: ");         // perror produces a message and describes the reasons
         return 2;
     }
+    
+    return 0;
        
  
 }
