@@ -7,7 +7,6 @@
     #include <stdio.h>                                          
 
 
-
 int main(int argc, char *argv[])                                // main function arguments
 {
     if(argc != 2)                                               // this_function_name users_directory_name
