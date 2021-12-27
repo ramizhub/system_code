@@ -3,10 +3,9 @@
     It exits 0 on success, and >0 if an error occurs. It does not print anything if the operation is successful.
 */
 
-    #include <sys/stat.h>
-    #include <sys/types.h>
+    #include <sys/stat.h>                                                       
+    #include <sys/types.h>                                                      // mode_t
     #include <stdio.h> 
-
 
 int main(int argc, char *argv[])                                                // main function arguments
 {
@@ -16,11 +15,11 @@ int main(int argc, char *argv[])                                                
         return 1;                                                               
     }
     
-    if(mkdir( argv[1], 740 ) != 0 )               // users_directory_name and creation_mode 
+    if(mkdir( argv[1], S_IRUSR | S_IWUSR | S_IXUSR ) != 0 )                     // users_directory_name and creation_mode 
     {
         perror("Error: ");                        
-        return -1;                                // mkdir standard bad return 
+        return -1;                                                              // mkdir standard bad return 
     }
     
-    return 0;                                     // mkdir standard success return
+    return 0;                                                                   // mkdir standard success return
 }
