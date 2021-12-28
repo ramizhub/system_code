@@ -4,22 +4,32 @@
 */
 
     #include <sys/stat.h>                                                       
-    #include <sys/types.h>                                                      // mode_t
+    #include <sys/types.h>                                                      
     #include <stdio.h> 
+    #include <stdlib.h>
 
-int main(int argc, char *argv[])                                                // main function arguments
+int main(int argc, char *argv[])                                                
 {
-    if(argc != 2)                                                               // this_function_name users_directory_name
+    
+    if(argc != 3)                                                               
     {
-        printf("Usage -> %s directory_name\n", argv[0]);                        // there i show user right usage 
+        printf("Usage -> %s directory_name mode\n", argv[0]);                       
         return 1;                                                               
     }
+   
     
-    if(mkdir( argv[1], S_IRUSR | S_IWUSR | S_IXUSR ) != 0 )                     // users_directory_name and creation_mode 
+    if( atoi(argv[2]) > 7777 || atoi(argv[2]) < 1 )
+    {
+        puts("Check acceptable values");
+        return 1;
+    }
+  
+
+    if(mkdir( argv[1], *argv[2] ) != 0 )                    
     {
         perror("Error: ");                        
-        return -1;                                                              // mkdir standard bad return 
+        return -1;                                                           
     }
     
-    return 0;                                                                   // mkdir standard success return
+    return 0;                                                                 
 }
