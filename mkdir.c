@@ -7,6 +7,7 @@
     #include <sys/types.h>                                            // mkdir function => mode_t           
     #include <stdio.h>                                                // printf                                               
     #include <string.h>                                               // strlen function
+    #include <stdlib.h>
 
 int main(int argc, char *argv[])                                      // usage!  ./a.out directory_name directory_mode ( octal )                            
 {
@@ -18,8 +19,7 @@ int main(int argc, char *argv[])                                      // usage! 
     }
     
     
-    if( atoi(*argv[2]) > 7777 || atoi(*argv[2]) < 1 )                 // wrong octal sum
-        printf("Wrong mode, look for documentation");
+
   
 
     int second_int_argument = 0, power_eight_value, our_int_array_element;  
