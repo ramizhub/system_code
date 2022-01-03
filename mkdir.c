@@ -20,7 +20,6 @@ int main(int argc, char *argv[])                                      // usage! 
     
     
 
-  
 
     int second_int_argument = 0, power_eight_value, our_int_array_element;  
     // second_int_argument == > our second mkdir function argument, which means creating mode. that is int digit
