@@ -2,7 +2,7 @@
     mkdir command receives 2 arguments:
            1. New directory to create.
            2. Mode of the directory in octal (similar to chmod)
-    It exits 0 on success, and >0 if an error occurs. It does not print anything if the operation is successful.
+    It exits 0 on success, and -1 if an error occurs. It does not print anything if the operation is successful.
 */
 
     #include <sys/stat.h>                                             // mkdir function                                             
