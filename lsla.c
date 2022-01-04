@@ -13,7 +13,7 @@ int main(int argc, char * argv[])                                     // argc = 
 {
     if(argc != 2)
     {
-        puts("Usage == >compiled_program directory_name");            // show conditions of usage
+        puts("Usage == >  compiled_program directory_name");            // show conditions of usage
         return 1;
     }
     
@@ -66,7 +66,7 @@ int main(int argc, char * argv[])                                     // argc = 
 
     if( (closedir(directory_pointer)) != 0)                                     // closing directory and looking for errors
     {
-        perror("Can't close this directory. Reason == > ");
+        perror("Can't close this directory. Reason == >  ");
         return 1;
     }
 
