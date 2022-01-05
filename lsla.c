@@ -6,7 +6,7 @@
     #include <dirent.h>                                               // working with directory
     #include <sys/types.h>                                            // data types
     #include <sys/stat.h>                                             // data returned by the stat() function
-    
+    #include <pwd.h>                                                  // password structure
 
 
 int main(int argc, char * argv[])                                     // argc = 2, compiled_program directory_name
@@ -27,13 +27,14 @@ int main(int argc, char * argv[])                                     // argc = 
  
     struct stat object_statistic;                                     // structure, which contains data about every file ( would contain )
     struct dirent *directory_statistic;                               // structure, from which i would take name of every file
+    struct passwd *user_id_statistic;                                 // structure, which contains data about passwords and important user_name ( user or group )
 
     char * helpful_pointer;                                           // pointer to string, which ctime function would return
     
     int files_count = 0;                                              // total == > files count 
     size_t helpful_size;                                              // i need to replace new line character by null character. 
     
-    printf("mode     uid       gid      f_size        lmod_time                 name");
+    printf("mode      u_name      g_name      f_size         lmod_time              name");
     putchar('\n');
 
     while( (directory_statistic = readdir(directory_pointer))  != NULL  )       // in the end of file or on error NULL returned
@@ -48,9 +49,13 @@ int main(int argc, char * argv[])                                     // argc = 
         
         printf("%lo     ", (unsigned long) object_statistic.st_mode);
     
-        printf("%d      ", object_statistic.st_uid);
+        user_id_statistic = getpwuid(object_statistic.st_uid);                  // return pointer to a structure with users' name
+        
+        printf("%s      ", user_id_statistic->pw_name);
+
+        user_id_statistic = getpwuid(object_statistic.st_gid);
     
-        printf("%d      ", object_statistic.st_gid);
+        printf("%s      ", user_id_statistic->pw_name);
     
         printf("%ld     ", object_statistic.st_size);                           // show user information about current file
     
