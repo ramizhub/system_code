@@ -1,4 +1,4 @@
-![First computer](firstcomputer.jpg)
+![](firstcomputer.jpg)
 
 # __System Code__
 ***
