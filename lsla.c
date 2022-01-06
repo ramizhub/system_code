@@ -7,7 +7,7 @@
     #include <sys/types.h>                                                      // data types
     #include <sys/stat.h>                                                       // data returned by the stat() function
     #include <pwd.h>                                                            // password structure
-
+    #include <grp.h>
 
 int main(int argc, char * argv[])                                               // argc = 2, compiled_program directory_name
 {
@@ -28,16 +28,15 @@ int main(int argc, char * argv[])                                               
     struct stat object_statistic;                                               // structure, which contains data about every file ( would contain )
     struct dirent *directory_statistic;                                         // structure, from which i would take name of every file
     struct passwd *user_id_statistic;                                           // structure, which contains data about passwords and important user_name
+    struct group  *group_id_statistic;                                          // structure, which contains data about groups
+
 
     char * string_pointer;                                                      // pointer to string, which ctime function would return
     
     int files_count = 0;                                                        // total == > files count 
     size_t helpful_size;                                                        // i need to replace new line character by null character. 
     
-    printf("mode          u_name          g_name          ");
-    printf("f_size             lmod_time                  name");               // showing columns' names
-    putchar('\n');
-
+  
     while( (directory_statistic = readdir(directory_pointer))  != NULL  )       // in the end of file or on error NULL returned
     {
         files_count++;               
@@ -120,19 +119,19 @@ int main(int argc, char * argv[])                                               
             putchar('-');     
         
         
-        user_id_statistic = getpwuid(object_statistic.st_uid);                  // return pointer to a structure with users' name
+        user_id_statistic = getpwuid(object_statistic.st_uid);                  // return pointer to a structure with user's name
         
-        printf("    %s      ", user_id_statistic->pw_name);
+        printf("\t%s", user_id_statistic->pw_name);
 
-        user_id_statistic = getpwuid(object_statistic.st_gid);
-    
-        printf("    %s      ", user_id_statistic->pw_name);
-    
-        printf("    %ld     ", object_statistic.st_size);                       // show user information about current file
-    
-        printf("    %s      ", string_pointer);
+        group_id_statistic = getgrgid(object_statistic.st_gid);                 // return pointer to a structure with group's name
 
-        printf("    %s      ", directory_statistic->d_name);
+        printf("\t%s", group_id_statistic->gr_name);
+    
+        printf("\t%ld", object_statistic.st_size);                              // show user information about current file
+    
+        printf("\t%s", string_pointer);
+
+        printf("\t%s", directory_statistic->d_name);
         
         putchar('\n');                                                          // start printing information about new file with new line character
     } 
