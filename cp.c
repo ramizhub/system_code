@@ -1,36 +1,86 @@
-    #include <stdio.h>
-    #include <sys/types.h>
-    #include <sys/stat.h>
-    #include <fcntl.h>
- 
-    #define ARRAY_SIZE 40
+#include <stdio.h>
+#include <stdbool.h>
 
+#include <time.h> 
 
+#include <sys/types.h>
+#include <sys/stat.h> 
 
-//            ./a.out source_file target_file
-int main(int argc, char * argv[])
+#include <dirent.h>
+#include <pwd.h>
+#include <grp.h>
+
+int main( int argc, char * argv[] )
 {
-    FILE * file_pointer_1 = fopen(argv[1], "r");
-    if(file_pointer_1 == NULL)
+    if( argc < 3)
     {
-        perror("error ;/  reason == >    ");
+        puts("cp: usage: compiled_program source target");                                         // looking for arguments count 
         return 1;
     }
+
+    struct stat standard_object_stat;
+    struct stat last_object_stat;
+
+    for(int index = 1; index < argc; index++)
+    {
+        if( stat(argv[index], &standard_object_stat) != 0)
+        {
+            perror("cp: error in stat function: ");                                                 // taking data from every argument and searching bugs
+            return 1;
+        }
+    } 
+ 
+    
+    stat(argv[argc - 1], &last_object_stat);
+    
+    if( (last_object_stat.st_mode & S_IFMT) == S_IFREG )
+    {
+        for(int index = 1; index < (argc - 1) ; index++)
+        {
+            stat(argv[index], &standard_object_stat);
+            if( (standard_object_stat.st_mode & S_IFMT) != S_IFREG)
+            {
+                puts("cp: invalid usage: only files can be copied in other files");                 // if last argument is file, rest need to be files, that is base 
+                return 1;
+            }    
+        }
+    }
+       
+    char read_buffer[40];
+
+    if( (last_object_stat.st_mode & S_IFMT) == S_IFREG )                                            // if last argument is file) 
+    {
+        
+        FILE * lastfp = fopen(argv[argc - 1], "a");                                                 // try to open last file
+        if(lastfp == NULL)
+        {
+            perror("cp: error in file opening: ");                                                  // if i can't open last file
+            return 1;
+        }
+
+        FILE * sdfp; 
+        for(int index = 1; index < (argc - 1); index++)
+        {
+            sdfp = fopen(argv[index], "r");                                                         // try to open every file except last
+            if(sdfp == NULL)
+            {
+                perror("cp: error in file opening: ");                                              // if i can't open one of them
+                return 1;
+            }
+            
+            while( fgets(read_buffer, 40, sdfp) != NULL )
+            {                                                                                       // copy bytes to target
+                fputs(read_buffer, lastfp);
+            }            
+        }
+    } 
    
-    FILE * file_pointer_2 = fopen(argv[2], "w");
     
-    char reading_buffer[ARRAY_SIZE];
-    while( fgets(reading_buffer, ARRAY_SIZE, file_pointer_1) != NULL)
-        fputs(reading_buffer, file_pointer_2);
-    
-    
-    if( fclose(file_pointer_1) != 0   ||   fclose(file_pointer_2) != 0    )
-    {
-        perror("error ;/  reason == >    ");
-        return 1;
-    }
 
 
 
-    return 0;
-}    
+
+
+
+
+}
