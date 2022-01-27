@@ -1,74 +1,41 @@
-#include <stdio.h> 
+#include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 
-int main(int argc, char *argv[])               // (int) argument count.   (char *) argv[] argument values
-{    
+int main( int argc, char * argv[] )
+{
+    char BUFFER[10];    ssize_t readbytes;
+    FILE * fp;    int fdescriptor;
+    
+    
+    if(argc == 1)                                                               // one argument    ->   stdin - terminal, stdout - terminal
+        while( fgets(BUFFER, 10, stdin) != NULL)                                
+            fputs(BUFFER, stdout);
 
-  if(argc != 2)                                // in this program i need 2 arguments in command line: function's and file's names.
-    { 
-       printf("Usage: %s file_name_to_read\n", argv[0] ); 
-       return 1;                                // evacuation from my program
-    }
-  
-  
+    else                                                                        // a few arguments ->   stdin - file, stdout - terminal
+        for(int index = 1; index < argc; index++)
+        {
+            fp = fopen( argv[index], "r");
+            
+            if( fp == NULL )
+            {
+                perror("cat: error in file opening: ");                         
+                exit(EXIT_FAILURE);
+            }
+            
+            fdescriptor = fileno(fp);  
+            
+            while( (readbytes = read(fdescriptor, BUFFER, 9)) != 0 )            
+            {
+                BUFFER[readbytes] = '\0';
+                fputs(BUFFER, stdout);
+            }
 
-    char buffer[601];                          // element with 600 index will be '\0'
-    ssize_t n_bytes_read;
-    
-    
-
-    printf("%s is opening. Waiting ...\n", argv[1]);  
-    
-        
-    FILE *fp = fopen( argv[1] ,  "r");         // created file pointer *fp
-    
-    // FILE *fopen(const char *restrict pathname, const char *restrict mode);
- 
-    // fopen returns file pointer if there were no problems
-         
-    // NULL is nothing and fopen returns pointer to NULL when there is a problem
-    
-     
-    if(fp == NULL)                             // fp - file pointer
-    {                
-       puts("I can't open this one...");
-       puts("Reason: ");
-       return 1;
-    }
-    puts("Opening ended succesfully");
-    
-    
-    int filedes;
-    filedes = fileno(fp);                      // filedes accepted fileno return vallue  fileno -> filedes 
-    printf("Ur file descriptor: %d\n", filedes); // filedes - file descriptor
-    
-    
-    
-    while( (n_bytes_read = read(filedes, buffer, 600)) != 0 )
-    
-    { 
-       buffer[n_bytes_read] = '\0';
-       printf("%s", buffer);                    // printf displays everything before NULL
-    }
-    
-     
-
-    if(fclose(fp) == EOF)
-    {
-      perror("Could not close file! Reason: ");
-      return 1;
-    }
-    putchar('\n');
-    puts("File was closed succesfully");  
-    
-   // after report on opening the program there would be report on closing
-      return 0;
-
-    
+            if( fclose(fp) != 0 )
+            {
+                perror("cat: error in file closing: ");
+                exit(EXIT_FAILURE);
+            }
+        }
 }
-
-
-
-   // int fileno(FILE *stream) returns file descriptor and file descriptor is always a positive number 
-   // in case of error he will return -1
