@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include <sys/types.h>
 #include <sys/stat.h> 
@@ -17,7 +18,6 @@ struct dirent * directory_stat;
 _Bool last_object_file = false;
 _Bool last_object_directory = false;
 
-#define AVERAGE 500
 
 int recfunc( char * current_object, char * last_object );
 
@@ -101,8 +101,8 @@ int main(int argc, char * argv[])
 
     if( last_object_directory == true )
     {
-        char current_object_name[AVERAGE];                                                          // NAMES RECFUNC ARGUMENTS                          
-        char last_object_name[AVERAGE];                                                                                       
+        char current_object_name[PATH_MAX];                                                         // NAMES RECFUNC ARGUMENTS                          
+        char last_object_name[PATH_MAX];                                                                                       
                                                                                                                              
         DIR * trgdp = opendir( argv[argc - 1] );                                                    
         if( trgdp == NULL )
@@ -125,11 +125,13 @@ int main(int argc, char * argv[])
 
 int recfunc( char * current_object, char * last_path )
 {
-    int size;   int slashcount = 0;
+    int size;   
+    int slashcount = 0;
     lstat( current_object, &src_stat );
     if( (src_stat.st_mode & S_IFMT) == S_IFREG )                                                    // WORKING WITH FILE -> DIRECTORY
     {
-        char currentobject_copy[AVERAGE];       strcpy( currentobject_copy, current_object );       // CREATING A COPY OF FILENAME
+        char currentobject_copy[PATH_MAX];       
+        strcpy( currentobject_copy, current_object );                                               // CREATING A COPY OF FILENAME
         size = strlen( current_object );
         slashcount = 0;
 
@@ -190,8 +192,10 @@ int recfunc( char * current_object, char * last_path )
             return 1;
 
         
-        char currentobject_copy[AVERAGE];   char lastpath_copy[AVERAGE];                            // COPIES FOR MEMORIZATION ( need after recfunc call )
-        strcpy( currentobject_copy, current_object );   strcpy( lastpath_copy, last_path );
+        char currentobject_copy[PATH_MAX];   
+        char lastpath_copy[PATH_MAX];                                                               // COPIES FOR MEMORIZATION ( need after recfunc call )
+        strcpy( currentobject_copy, current_object );   
+        strcpy( lastpath_copy, last_path );
 
         size = strlen( current_object );    slashcount = 0;
 
@@ -242,9 +246,11 @@ int recfunc( char * current_object, char * last_path )
 
     if( (src_stat.st_mode & S_IFMT) == S_IFLNK )                                                    // WORKING WITH LINK -> DIRECTORY
     {
-        slashcount = 0;     size = strlen( current_object );
-        char currentobject_copy[AVERAGE];   strcpy( currentobject_copy, current_object );
-        char linkcontent[AVERAGE];
+        slashcount = 0;     
+        size = strlen( current_object );
+        char currentobject_copy[PATH_MAX];   
+        strcpy( currentobject_copy, current_object );
+        char linkcontent[PATH_MAX];
         
         for( int reindex = 0; reindex < size; reindex++ )
             if( current_object[reindex] == '/' )
@@ -267,7 +273,7 @@ int recfunc( char * current_object, char * last_path )
             strcat( last_path, temp_pt );
         }
         
-        if( readlink( current_object, linkcontent, AVERAGE ) == -1 )
+        if( readlink( current_object, linkcontent, PATH_MAX ) == -1 )
         {
             perror("cp: error in readlink function: ");
             exit(EXIT_FAILURE);                                                                     // CREATING A LINK
