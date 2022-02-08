@@ -26,7 +26,7 @@ int main(int argc, char * argv[])
 {
     if(argc < 3)
     {
-        puts("cp: error in usage: compiled_program  source_objects  target_object");                                    // USAGE CHECKING
+        puts("cp: error in usage: compiled_program  source_objects  target_object");                // USAGE CHECKING
         exit(EXIT_FAILURE);
     }
 
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
     
     if( stat(argv[argc -1], &trg_stat) != 0)
     {
-        perror("cp: error in stat function, working with last object: ");                                               // STAT LAST OBJECT CHECKING
+        perror("cp: error in stat function, working with last object: ");                           // STAT LAST OBJECT CHECKING
         exit(EXIT_FAILURE);
     }
 
@@ -45,7 +45,7 @@ int main(int argc, char * argv[])
     if( (trg_stat.st_mode & S_IFMT) == S_IFREG )
     {
         last_object_file = true;
-    } else if( (trg_stat.st_mode & S_IFMT) == S_IFDIR )                                                                 // FIGURE OUT WHAT IS OUR LAST OBJECT: FILE OR DIRECTORY
+    } else if( (trg_stat.st_mode & S_IFMT) == S_IFDIR )                                             // FIGURE OUT WHAT IS OUR LAST OBJECT: FILE OR DIRECTORY
     {
         last_object_directory = true;
     }
@@ -59,7 +59,7 @@ int main(int argc, char * argv[])
             if( stat( argv[reindex], &src_stat) != 0 )
             {
                 perror("cp: error in stat function, working with src object: ");
-                exit(EXIT_FAILURE);                                                                                     // LOOKING FOR NONFILE OBJECTS, THAT I CAN'T COPY IN FILE
+                exit(EXIT_FAILURE);                                                                 // LOOKING FOR NONFILE OBJECTS
             } if( (src_stat.st_mode & S_IFMT) != S_IFREG )   
             {
                 puts("cp: error in usage: u can't copy nonfile objects in file");
@@ -83,7 +83,7 @@ int main(int argc, char * argv[])
         }
 
         for(int reindex = 1; reindex < argc - 1; reindex++)
-        {                                                                                                               // COPY FILES IN FILE 
+        {                                                                                           // COPY FILES IN FILE 
             srcfp = fopen( argv[reindex], "r" );
             if(srcfp == NULL)
             {
@@ -101,13 +101,13 @@ int main(int argc, char * argv[])
 
     if( last_object_directory == true )
     {
-        char current_object_name[AVERAGE];                                                          // NAMES FOR ARGV == RECFUNC ARGUMENTS                          
+        char current_object_name[AVERAGE];                                                          // NAMES RECFUNC ARGUMENTS                          
         char last_object_name[AVERAGE];                                                                                       
                                                                                                                              
         DIR * trgdp = opendir( argv[argc - 1] );                                                    
         if( trgdp == NULL )
         {
-            perror("cp: error in opendir function, working with target directory");                 // CHECKING LAST DIRECTORY FOR WORKING                
+            perror("cp: error in opendir function, working with target directory");                               
             exit(EXIT_FAILURE);
         }                                                                                                               
 
@@ -129,13 +129,13 @@ int recfunc( char * current_object, char * last_path )
     lstat( current_object, &src_stat );
     if( (src_stat.st_mode & S_IFMT) == S_IFREG )                                                    // WORKING WITH FILE -> DIRECTORY
     {
-        char currentobject_copy[AVERAGE];       strcpy( currentobject_copy, current_object );       // CREATING A COPY OF FILE'S NAME
+        char currentobject_copy[AVERAGE];       strcpy( currentobject_copy, current_object );       // CREATING A COPY OF FILENAME
         size = strlen( current_object );
         slashcount = 0;
 
         
         for( int reindex = 0; reindex < size; reindex++ )
-            if( current_object[reindex] == '/' )                                                    // LOOKING FOR '/' IN FILE'S NAME ( in a path or in a word )
+            if( current_object[reindex] == '/' )                                                    // LOOKING FOR '/' IN FILENAME ( in a path or in a word )
                 slashcount++;
 
         if( slashcount == 0 )                                                                       // word case
@@ -144,15 +144,10 @@ int recfunc( char * current_object, char * last_path )
             strcat( last_path, current_object );
         } else if( slashcount != 0 )                                                                // path case
         {
-            char * temp_pt;
-            for( int reindex = 0; reindex < slashcount; reindex++ )
-            {   
-                temp_pt = strstr( currentobject_copy, "/" );
-                if( reindex == slashcount-1 )
-                    break;
-
-                temp_pt[0] = '`';
-            }
+            char * temp_pt = strstr( currentobject_copy, "/" );
+            for( int reindex = 0; reindex < slashcount - 1; reindex++ )
+                temp_pt = strstr( temp_pt + 1, "/" );
+            
 
             strcpy( currentobject_copy, current_object );
             strcat( last_path, temp_pt );
@@ -164,7 +159,7 @@ int recfunc( char * current_object, char * last_path )
         {
             perror("cp: error in source file opening: ");
             exit(EXIT_FAILURE);
-        }                                                                                           // 1) OPENING EXISTING ( source ) FILE 2) OPENING UNKNOWN FILE WITH THIS NAME
+        }                                                                                           // 1) OPENING EXISTING ( source ) FILE 2) OPENING UNKNOWN FILE WITH FILENAME
         FILE * trgfp = fopen( last_path, "a+" );
         if( trgfp == NULL )
         {
@@ -202,7 +197,7 @@ int recfunc( char * current_object, char * last_path )
 
         
         for( int reindex = 0; reindex < size; reindex++ )
-            if( current_object[reindex] == '/' )                                                    // LOOKING FOR '/' IN DIR'S NAME ( in a path or in a word)               
+            if( current_object[reindex] == '/' )                                                    // LOOKING FOR '/' IN DIRNAME ( in a path or in a word )               
                 slashcount++;
 
         if( slashcount == 0)                                                                        // word case
@@ -211,15 +206,9 @@ int recfunc( char * current_object, char * last_path )
             strcat( last_path, current_object );
         } else if( slashcount != 0)                                                                 // path case
         {
-            char * temp_pt;
-            for( int reindex = 0; reindex < slashcount; reindex++ )
-            {
-                temp_pt = strstr( currentobject_copy, "/" );
-                if( reindex == slashcount-1 )
-                    break;
-                
-                temp_pt[0] = '`';
-            }
+            char * temp_pt = strstr( currentobject_copy, "/" );
+            for( int reindex = 0; reindex < slashcount - 1; reindex++ )
+                temp_pt = strstr( temp_pt + 1, "/" );
 
             strcpy( currentobject_copy, current_object );
             strcat( last_path, temp_pt );
@@ -243,7 +232,7 @@ int recfunc( char * current_object, char * last_path )
                 continue;
 
             strcat( current_object, "/" );
-            strcat( current_object, directory_stat->d_name );                                       // CRAFTING PATH WITH DIR'S NAME AND HIS FILE'S NAME 
+            strcat( current_object, directory_stat->d_name );                                       // CRAFTING PATH WITH DIRNAME AND FILENAME 
             recfunc( current_object, last_path );
             strcpy( last_path, lastpath_copy );                                                     // PULL VALUES FROM COPIES
             strcpy( current_object, currentobject_copy );
@@ -251,7 +240,7 @@ int recfunc( char * current_object, char * last_path )
     }
 
 
-    if( (src_stat.st_mode & S_IFMT) == S_IFLNK )
+    if( (src_stat.st_mode & S_IFMT) == S_IFLNK )                                                    // WORKING WITH LINK -> DIRECTORY
     {
         slashcount = 0;     size = strlen( current_object );
         char currentobject_copy[AVERAGE];   strcpy( currentobject_copy, current_object );
@@ -270,20 +259,23 @@ int recfunc( char * current_object, char * last_path )
 
         if( slashcount != 0)
         {
-            char * temp_pt;
-            for( int reindex = 0; reindex < slashcount; reindex++ )
-            {   
-                temp_pt = strstr( current_object, "/" );
-                if( reindex == slashcount - 1)
-                    break;
+            char * temp_pt = strstr( current_object, "/" );;
+            for( int reindex = 0; reindex < slashcount - 1; reindex++ )
+               temp_pt = strstr( temp_pt + 1, "/" );
             
-                temp_pt[0] = '`';
-            }
             strcpy( current_object, currentobject_copy );
             strcat( last_path, temp_pt );
         }
         
-        readlink( current_object, linkcontent, AVERAGE );
-        symlink( linkcontent, last_path );
+        if( readlink( current_object, linkcontent, AVERAGE ) == -1 )
+        {
+            perror("cp: error in readlink function: ");
+            exit(EXIT_FAILURE);                                                                     // CREATING A LINK
+        } if( symlink( linkcontent, last_path ) != 0 )
+        {
+            perror("cp: error in symlink function: ");
+            exit(EXIT_FAILURE);
+        }
+    
     }
 }
