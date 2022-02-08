@@ -126,7 +126,7 @@ int main(int argc, char * argv[])
 int recfunc( char * current_object, char * last_path )
 {
     int size;   int slashcount = 0;
-    stat( current_object, &src_stat );
+    lstat( current_object, &src_stat );
     if( (src_stat.st_mode & S_IFMT) == S_IFREG )                                                    // WORKING WITH FILE -> DIRECTORY
     {
         char currentobject_copy[AVERAGE];       strcpy( currentobject_copy, current_object );       // CREATING A COPY OF FILE'S NAME
@@ -248,5 +248,42 @@ int recfunc( char * current_object, char * last_path )
             strcpy( last_path, lastpath_copy );                                                     // PULL VALUES FROM COPIES
             strcpy( current_object, currentobject_copy );
         }
+    }
+
+
+    if( (src_stat.st_mode & S_IFMT) == S_IFLNK )
+    {
+        slashcount = 0;     size = strlen( current_object );
+        char currentobject_copy[AVERAGE];   strcpy( currentobject_copy, current_object );
+        char linkcontent[AVERAGE];
+        
+        for( int reindex = 0; reindex < size; reindex++ )
+            if( current_object[reindex] == '/' )
+                slashcount++;
+
+
+        if( slashcount == 0 )
+        {
+            strcat( last_path, "/" );
+            strcat( last_path, current_object );
+        }
+
+        if( slashcount != 0)
+        {
+            char * temp_pt;
+            for( int reindex = 0; reindex < slashcount; reindex++ )
+            {   
+                temp_pt = strstr( current_object, "/" );
+                if( reindex == slashcount - 1)
+                    break;
+            
+                temp_pt[0] = '`';
+            }
+            strcpy( current_object, currentobject_copy );
+            strcat( last_path, temp_pt );
+        }
+        
+        readlink( current_object, linkcontent, AVERAGE );
+        symlink( linkcontent, last_path );
     }
 }
