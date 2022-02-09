@@ -113,8 +113,8 @@ int main(int argc, char * argv[])
 
         for( int index = 1; index < argc - 1; index++)
         {
-            strcpy( current_object_name, argv[index] );                                             // REFRESHING RECFUNC ARGUMENTS
-            strcpy( last_object_name, argv[argc - 1] );
+            strncpy( current_object_name, argv[index], strlen(argv[index]) + 1 );                   // REFRESHING RECFUNC ARGUMENTS
+            strncpy( last_object_name, argv[argc - 1], strlen(argv[argc-1]) + 1 );
             recfunc( current_object_name, last_object_name );
         }
     }
@@ -131,7 +131,7 @@ int recfunc( char * current_object, char * last_path )
     if( (src_stat.st_mode & S_IFMT) == S_IFREG )                                                    // WORKING WITH FILE -> DIRECTORY
     {
         char currentobject_copy[PATH_MAX];       
-        strcpy( currentobject_copy, current_object );                                               // CREATING A COPY OF FILENAME
+        strncpy( currentobject_copy, current_object, strlen(current_object) + 1 );                  // CREATING A COPY OF FILENAME
         size = strlen( current_object );
         slashcount = 0;
 
@@ -151,7 +151,7 @@ int recfunc( char * current_object, char * last_path )
                 temp_pt = strstr( temp_pt + 1, "/" );
             
 
-            strcpy( currentobject_copy, current_object );
+            strncpy( currentobject_copy, current_object, strlen(current_object) + 1 );
             strcat( last_path, temp_pt );
         }
         
@@ -194,8 +194,8 @@ int recfunc( char * current_object, char * last_path )
         
         char currentobject_copy[PATH_MAX];   
         char lastpath_copy[PATH_MAX];                                                               // COPIES FOR MEMORIZATION ( need after recfunc call )
-        strcpy( currentobject_copy, current_object );   
-        strcpy( lastpath_copy, last_path );
+        strncpy( currentobject_copy, current_object, strlen(current_object) + 1 );   
+        strncpy( lastpath_copy, last_path, strlen(last_path) + 1 );
 
         size = strlen( current_object );    slashcount = 0;
 
@@ -214,11 +214,11 @@ int recfunc( char * current_object, char * last_path )
             for( int reindex = 0; reindex < slashcount - 1; reindex++ )
                 temp_pt = strstr( temp_pt + 1, "/" );
 
-            strcpy( currentobject_copy, current_object );
+            strncpy( currentobject_copy, current_object, strlen(current_object) + 1 );
             strcat( last_path, temp_pt );
         }
         
-        strcpy( lastpath_copy, last_path );                                                         // MEMORIZATION LAST PATH IN HIS COPY
+        strncpy( lastpath_copy, last_path, strlen(last_path) + 1 );                                 // MEMORIZATION LAST PATH IN HIS COPY
         mkdir( last_path, 4095 );
 
         
@@ -238,8 +238,8 @@ int recfunc( char * current_object, char * last_path )
             strcat( current_object, "/" );
             strcat( current_object, directory_stat->d_name );                                       // CRAFTING PATH WITH DIRNAME AND FILENAME 
             recfunc( current_object, last_path );
-            strcpy( last_path, lastpath_copy );                                                     // PULL VALUES FROM COPIES
-            strcpy( current_object, currentobject_copy );
+            strncpy( last_path, lastpath_copy, strlen(lastpath_copy) + 1 );                         // PULL VALUES FROM COPIES
+            strncpy( current_object, currentobject_copy, strlen(currentobject_copy) + 1 );
         }
     }
 
@@ -249,7 +249,7 @@ int recfunc( char * current_object, char * last_path )
         slashcount = 0;     
         size = strlen( current_object );
         char currentobject_copy[PATH_MAX];   
-        strcpy( currentobject_copy, current_object );
+        strncpy( currentobject_copy, current_object, strlen(current_object) + 1 );
         char linkcontent[PATH_MAX];
         
         for( int reindex = 0; reindex < size; reindex++ )
@@ -269,7 +269,7 @@ int recfunc( char * current_object, char * last_path )
             for( int reindex = 0; reindex < slashcount - 1; reindex++ )
                temp_pt = strstr( temp_pt + 1, "/" );
             
-            strcpy( current_object, currentobject_copy );
+            strncpy( current_object, currentobject_copy, strlen(currentobject_copy) + 1 );
             strcat( last_path, temp_pt );
         }
         
