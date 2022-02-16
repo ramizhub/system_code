@@ -96,19 +96,30 @@ main(void)
             continue;
 //                                                              CREATE 2 "/proc/[pid]" PATHS
         
+        
         strncpy( path, "/proc/", strlen("/proc/") + 1 );
         if( PATH_MAX - strlen(path) >= 1 )
         {
             avialable = PATH_MAX - strlen(path) - 1;
             strncat( path, dir_struct->d_name, avialable );
+        } else
+        {
+            printf("%s's array maxsize is not enough to take %s", path, dir_struct->d_name );
+            exit(EXIT_FAILURE);
         }
+        
         
         strncpy( statmpath, "/proc/", strlen("/proc/") + 1 );
         if( PATH_MAX - strlen(statmpath) >= 1 )
         {    
             avialable = PATH_MAX - strlen(statmpath) - 1;
             strncat( statmpath, dir_struct->d_name, avialable );
+        } else
+        {
+            printf("%s's array maxsize is not enough to take %s", statmpath, dir_struct->d_name );
+            exit(EXIT_FAILURE);
         }
+        
         
         if( lstat(path, &lstat_struct) != 0 )
         {
@@ -136,10 +147,21 @@ main(void)
             {    
                 avialable = PATH_MAX - strlen(path) - 1;
                 strncat( path, "/stat", avialable );
-            } if( PATH_MAX - strlen(statmpath) >= 1 )
+            } else
+            {
+                printf("%s's array maxsize is not enough to take /stat", path );
+                exit(EXIT_FAILURE);
+            }
+            
+            
+            if( PATH_MAX - strlen(statmpath) >= 1 )
             {
                 avialable = PATH_MAX - strlen(statmpath) - 1;
                 strncat( statmpath, "/statm", avialable );
+            } else
+            {
+                printf("%s's array maxsize is not enough to take /statm", statmpath );
+                exit(EXIT_FAILURE);
             }    
             
 
