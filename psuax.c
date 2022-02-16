@@ -6,13 +6,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
 #include <string.h>
 #include <unistd.h>
+
 #include <limits.h>
+#include <errno.h>
 
 #include <pwd.h>                                                            
 #include <grp.h>
+#include <dirent.h>
 
 #include <sys/types.h>                                                      
 #include <sys/stat.h>
@@ -51,7 +53,7 @@ main(void)
     unsigned long long starttime;                   // time the process started after system boot ( in my linux version it is clock ticks, so divide it by sysconf(_SC_CLK_TCK) )
     unsigned int hours, minutes, seconds;           // translate starttime to hh:mi:ss -> "START" is time the duration of the process in the format hh:mi:ss
     unsigned long phymemory_kb;                     // take this value from "/proc/meminfo" (first on the list) and divide rss_kb by this value to get %MEM
-
+    unsigned long avialable;                        // variable, that keeps track of free space in path and statmpath array
 
 
     
@@ -93,10 +95,20 @@ main(void)
         if( dir_struct->d_name[0] == '.' )
             continue;
 //                                                              CREATE 2 "/proc/[pid]" PATHS
+        
         strncpy( path, "/proc/", strlen("/proc/") + 1 );
-        strncat( path, dir_struct->d_name, strlen(dir_struct->d_name) + 1 );
+        if( PATH_MAX - strlen(path) >= 1 )
+        {
+            avialable = PATH_MAX - strlen(path) - 1;
+            strncat( path, dir_struct->d_name, avialable );
+        }
+        
         strncpy( statmpath, "/proc/", strlen("/proc/") + 1 );
-        strncat( statmpath, dir_struct->d_name, strlen(dir_struct->d_name) + 1 );
+        if( PATH_MAX - strlen(statmpath) >= 1 )
+        {    
+            avialable = PATH_MAX - strlen(statmpath) - 1;
+            strncat( statmpath, dir_struct->d_name, avialable );
+        }
         
         if( lstat(path, &lstat_struct) != 0 )
         {
@@ -105,7 +117,8 @@ main(void)
             exit(EXIT_FAILURE);
         }
 
-        if( (lstat_struct.st_mode & S_IFMT) == S_IFDIR )
+        
+        if( S_ISDIR(lstat_struct.st_mode) )
         {
             dp_inner = opendir(path);
             if(dp_inner == NULL)
@@ -119,13 +132,40 @@ main(void)
 
 
 //                                                              CREATE "/proc/[pid]/stat" AND "/proc/statm"
-            strncat( path, "/stat", strlen("/stat") + 1);
-            strncat( statmpath, "/statm", strlen("/statm") + 1);
+            if( PATH_MAX - strlen(path) >= 1 )
+            {    
+                avialable = PATH_MAX - strlen(path) - 1;
+                strncat( path, "/stat", avialable );
+            } if( PATH_MAX - strlen(statmpath) >= 1 )
+            {
+                avialable = PATH_MAX - strlen(statmpath) - 1;
+                strncat( statmpath, "/statm", avialable );
+            }    
             
+
+/*                                                              2 error cases in "/proc/[pid]/stat" file opening: 
+                            
+                            1) file exists and i can't open it  2) file does not exist and that is why i can't open it                              
+                            
+                            1) the first case is a catastrophic failure and we have to show an error message to the user and exit 
+                                                                2) that is normal situation because not all directories are process directories  
+*/
+
+
             fp = fopen( path, "r" );
             if( fp == NULL )
-                continue;
+            {
+                if( errno == ENOENT )
+                    continue;
+                else
+                {
+                    printf("ps: error in %s file opening: ", path);
+                    perror(NULL);
+                    exit(EXIT_FAILURE);
+                }
+            }
 
+    
             pass_struct = getpwuid( lstat_struct.st_uid );
             if( pass_struct == NULL )
             {
