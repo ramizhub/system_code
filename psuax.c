@@ -358,22 +358,17 @@ main(void)
 
 
 
+// THIS FUNCTION COMPARES TTY_NR FROM "/proc/pid/stat" WITH RETURNED VALUE FROM STAT FUNCTION - st_rdev 
+// IF THESE NUMBERS EQUAL TO EACH OTHER THEN PRINT THIS DEVICE NAME (in fact it will be ttyname)
 
 void find_ttyname ( FILE * statfp )
 {
-
-/*
-    THIS FUNCTION COMPARES TTY_NR FROM "/proc/pid/stat" WITH RETURNED VALUE FROM STAT FUNCTION - st_rdev 
-    IF THESE NUMBERS EQUAL TO EACH OTHER THEN PRINT THIS DEVICE NAME (in fact it will be ttyname)
-*/
     
     _Bool theretty = false;                                     // a certain terminal is responsible for this process
     int tty_nr;                                                 // controlling terminal of the process ( number )
     char devpath[PATH_MAX];                                     // "/dev/" -> "/dev/device_name" -> "/dev/"
-    unsigned long avialable;                                    // variable, that keeps track of free space in devpath array
     
     static DIR * ddp;                                           // "/dev" directory pointer                                   
-
     static struct dirent * dev_dirstruct;                       // readdir return value, use dev_dirstruct.d_name for every object name in this directory
     static struct stat devstat_struct;                          // returns representing device ID 
     
@@ -410,16 +405,16 @@ void find_ttyname ( FILE * statfp )
             continue;
         
         
-        if( PATH_MAX - strlen(devpath) >= 1 )
-        {
-            avialable = PATH_MAX - strlen(devpath) - 1;
-            strncat( devpath, dev_dirstruct->d_name, avialable );
-        } else
-        {
+        
+        if( strlen(devpath) + strlen(dev_dirstruct->d_name) + 1 <= PATH_MAX )
+            strncat( devpath, dev_dirstruct->d_name, strlen(dev_dirstruct->d_name) );
+        else
+        { 
             printf("%s's array maxsize is not enough to take %s", devpath, dev_dirstruct->d_name );
             exit(EXIT_FAILURE);
         }
-
+        
+        
         
         if( stat( devpath, &devstat_struct ) != 0 )
             continue;
