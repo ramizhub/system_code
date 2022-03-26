@@ -1,109 +1,148 @@
+/*
+┌────────────────────────────────┐
+│ bash: ./a.out commandname      │
+│                                │
+│                                │
+└──────────────────┬─────────────┘                       ┌──────────────────────────────────┐
+                   │                                     │ break PATH into the parts        │
+                   │                                     │  │                               │
+                   │   env PATH, commandname             │  │                               │
+                   └──────────────────────────────────►  │  └───► search binary by adresses │
+                                                         │              │                   │
+                                                         │              │                   │
+                                                         │              │                   │
+                                                         │return NULL ◄─┴─► return required │
+                                                         │                         binary   │
+                                                         │                                  │
+┌─────────────────────────────────────┐                  │                                  │
+│ LOOP ( exit with "exit" )           │                  └────────────┬─────────────────────┘
+│    fork()                           │                               │
+│     │    │      child process       │                               │
+│     │    └────►   exec binary       │                               │
+│     │                               │    NULL or required  binary   │
+│     │                               │◄──────────────────────────────┘
+│     │      parent process           │
+│     └───►    wait for child         │
+│                                     │
+│                                     │
+│                                     │
+└─────────────────────────────────────┘
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <unistd.h>
+#include <stdbool.h>
 #include <limits.h>
-
 #include <sys/types.h>
 #include <dirent.h>
+#include <sys/wait.h>
 
-#include <stdbool.h>
+#define SLASH "/"
+#define COLON ':'
 
-char * FindReqPath( char * envPATH, char * commname );
+
+char * findPath( char * envPATH, char * commname );
 
 int 
-main( int argc, char * argv[] )
-{
-    if( argc != 2 )
-    {
-        puts("usage: compiled_program command_name ");
+main( int argc, char * argv[] ) {
+    
+    if( argc < 2 ) {
+        puts("usage: compiled_program command_name");
         exit(EXIT_FAILURE);
     }
-
-    pid_t fork_result;
     
-    char * envPATH = getenv("PATH");    
+    pid_t pid;    
+    
     char * reqpath;
     char * newargv[] = { NULL };
     char * newenvp[] = { NULL };
+    char * envPATH = getenv("PATH");  
+
     newargv[0] = argv[1];
-    
-    
-    reqpath = FindReqPath( envPATH, argv[1] );
 
-    if( reqpath == NULL )
-    {
-        puts("execve: error in searching command's binary ");
-        exit(EXIT_FAILURE);
+
+    while( strcmp( argv[1], "exit") != 0 && strcmp( argv[0], "exit") != 0 ) {
+        
+        reqpath = findPath( envPATH, argv[1] );
+        
+        if( reqpath == NULL ) {
+            puts("execve: error in searching command's binary ");
+            exit(EXIT_FAILURE);
+        }
+
+    
+        if( strlen(reqpath) + strlen(argv[1]) + strlen(SLASH) + 1 <= PATH_MAX ) {
+            strcat( reqpath, SLASH );
+            strncat( reqpath, argv[1], strlen(argv[1]) );
+        } else {
+            printf("%s has not enough size to concatenate %s\n", reqpath, argv[1] );
+            exit(EXIT_FAILURE);
+        }
+
+
+        pid = fork();
+        if( pid == - 1 ) {
+            perror("error fork function: ");
+            exit(EXIT_FAILURE);
+        }
+
+        if( pid == 0 ) {
+            execve( reqpath, newargv, newenvp );
+        
+            perror("error: ");                      
+            exit(EXIT_FAILURE);
+        }
+        else {
+            waitpid( 0, NULL, 0 );
+            scanf("%s", newargv[0] );
+        }
     }
-
-    
-    strcat( reqpath, "/" );
-    strcat( reqpath, argv[1] );
-    
-    
-    fork_result = fork();
-    if( fork_result == - 1 )
-    {
-        perror("error in fork function: ");
-        exit(EXIT_FAILURE);
-    }
-
-    if( fork_result == 0 )
-        execve( reqpath, newargv, newenvp );
-    else
-        puts("Done!");
 }
 
 
-char * FindReqPath( char * envPATH, char * commname )
-{
+char * findPath( char * envPATH, char * commname ) {
     
-    
-    struct dirent * dir_struct;
     DIR * dirp;
+    struct dirent * dirstruct;
     
     char * reqpath;
-
-    int ix1 = 0;
-    int ix2 = 0;
     
-    _Bool WEfoundpath = false;
+    int ct = 0;
+    int v = 0;
+    
+    _Bool isBinary = false;
 
-
-    while( WEfoundpath != true )
-    {
+    while( isBinary != true ) {
+        
         reqpath = calloc( 1000, sizeof(char) );
-        while( envPATH[ix1] != ':' )
-        {
-            reqpath[ix2] = envPATH[ix1];
-            ix1++;
-            ix2++;
+        while( envPATH[ct] != COLON ) {
+            reqpath[v] = envPATH[ct];
+            ct++;
+            v++;
         }
 
         dirp = opendir( reqpath );
-        if( dirp == NULL )
-        {
+        
+        if( dirp == NULL ) {
             perror("error in opening one of env adresses: ");
             exit(EXIT_FAILURE);
         }
 
-        while( (dir_struct = readdir(dirp)) != NULL )
-            if( strcmp( commname, dir_struct->d_name ) == 0 )
-                WEfoundpath = true;       
+        while( (dirstruct = readdir(dirp)) != NULL )
+            if( strcmp( commname, dirstruct->d_name ) == 0 )
+                isBinary = true;       
 
-        if( WEfoundpath == true )
+        if( isBinary == true ) 
             return reqpath;
     
-        ix2 = 0;
-        ix1++;
+        v = 0, ct++;
 
-        if( ix1 > strlen( envPATH) && WEfoundpath != true )
+        if( ct > strlen( envPATH) && isBinary != true )
             return NULL;
-
-
+        
         free(reqpath);
     }
-
 }
