@@ -44,7 +44,7 @@ void listsigs(void) {                                                           
 int main(int argc, char * argv[]) {
     
     if(argc < 2) {
-        puts("usage: cprogram pid");
+        printf("usages:\n%s -l\n%s pid\n%s sig pid\n", argv[0], argv[0], argv[0]);
         exit(EXIT_FAILURE);
     }
     
@@ -52,7 +52,7 @@ int main(int argc, char * argv[]) {
     int sig;
 
     if(argc == 2) {                                                             // compiled_program -l
-        if(strcmp(argv[1], "-l") == 0 )
+        if(strcmp(argv[1], "-l") == 0)
             listsigs();
         else {                                                                  // compiled_program pid (kill process)
             pid = atoi(argv[1]);
