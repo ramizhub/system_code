@@ -1,34 +1,40 @@
 /*
-┌────────────────────────────────┐
-│ bash: ./a.out commandname      │
+ ┌───────────────────────────────────────┐
+ │$: ./a.out commandname                 │
+ │$: ./a.out commandpath                 │
+ └──────────────────────┬────────────────┘
+                        │                          ┌────────────────────────────────────────────────────────────┐
+                        │env PATH, command         │ Break env PATH into the parts                              │
+                        └────────────────────────► │    │                                                       │
+                                 findPath()        │    │ if commandpath is given                               │
+                                                   │    ├──────────────────────────────►  return commandpath    │
+                                                   │    │                                                       │
+                                                   │    │                                                       │
+                                                   │    │                                                       │
+                                                   │    │ if commandname is given         create a binary path  │
+┌────────────────────────────────┐                 │    └──────────────────────────────►  check it for existence│
+│ findPath()                     │                 │                                       │     │              │
+│                                │                 │                   couldn't find       │     │              │
+│ LOOP                           │                 │return NULL      ◄─────────────────────┘     │              │
+│ exit when user◄─────────────┐  │                 │                                             │              │
+│ types "exit"                │  │                 │                                             │              │
+│                             │  │                 │                   found binary              │              │
+│                             │  │                 │return binary    ◄───────────────────────────┘              │
+│ fork()                      │  │◄────────────────┤                                                            │
+│ │                           │  │                 └────────────────────────────────────────────────────────────┘
+│ │                           │  │
+│ │                           │  │
+│ │pid = 0                    │  │
+│ ├─────────────►  run binary │  │
+│ │                           │  │
+│ │pid = -1                   │  │
+│ ├─────────────►  exit       │  │
+│ │                           │  │
+│ │else                       │  │
+│ └─────────────►  wait for child│
 │                                │
-│                                │
-└──────────────────┬─────────────┘                       ┌──────────────────────────────────┐
-                   │                                     │ break PATH into the parts        │
-                   │                                     │  │                               │
-                   │   env PATH, commandname             │  │                               │
-                   └──────────────────────────────────►  │  └───► search binary by adresses │
-                                                         │              │                   │
-                                                         │              │                   │
-                                                         │              │                   │
-                                                         │return NULL ◄─┴─► return required │
-                                                         │                         binary   │
-                                                         │                                  │
-┌─────────────────────────────────────┐                  │                                  │
-│ LOOP ( exit with "exit" )           │                  └────────────┬─────────────────────┘
-│    fork()                           │                               │
-│     │    │      child process       │                               │
-│     │    └────►   exec binary       │                               │
-│     │                               │    NULL or required  binary   │
-│     │                               │◄──────────────────────────────┘
-│     │      parent process           │
-│     └───►    wait for child         │
-│                                     │
-│                                     │
-│                                     │
-└─────────────────────────────────────┘
+└────────────────────────────────┘
 */
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,16 +47,17 @@
 #include <sys/wait.h>
 
 #define SLASH "/"
+#define chSLASH '/'
 #define COLON ':'
 
 
-char * findPath( char * envPATH, char * commname );
+char * findPath(char * envPATH, char * commname);
 
 int 
-main( int argc, char * argv[] ) {
+main(int argc, char * argv[]) {
     
-    if( argc < 2 ) {
-        puts("usage: compiled_program command_name");
+    if(argc < 2) {
+        printf("usages:\n%s command_name", argv[0]);
         exit(EXIT_FAILURE);
     }
     
@@ -64,85 +71,78 @@ main( int argc, char * argv[] ) {
     newargv[0] = argv[1];
 
 
-    while( strcmp( argv[1], "exit") != 0 && strcmp( argv[0], "exit") != 0 ) {
+    while(strcmp( argv[1], "exit") != 0 && strcmp( argv[0], "exit") != 0) {
         
-        reqpath = findPath( envPATH, argv[1] );
+        reqpath = findPath(envPATH, argv[1]);
         
-        if( reqpath == NULL ) {
-            puts("execve: error in searching command's binary ");
+        if(reqpath == NULL) {
+            puts("could not find requested command in the PATH. ");
             exit(EXIT_FAILURE);
         }
-
-    
-        if( strlen(reqpath) + strlen(argv[1]) + strlen(SLASH) + 1 <= PATH_MAX ) {
-            strcat( reqpath, SLASH );
-            strncat( reqpath, argv[1], strlen(argv[1]) );
-        } else {
-            printf("%s has not enough size to concatenate %s\n", reqpath, argv[1] );
-            exit(EXIT_FAILURE);
-        }
-
 
         pid = fork();
-        if( pid == - 1 ) {
+        
+        if(pid == - 1) {
             perror("error fork function: ");
             exit(EXIT_FAILURE);
         }
 
-        if( pid == 0 ) {
-            execve( reqpath, newargv, newenvp );
+        if(pid == 0) {
+            execve(reqpath, newargv, newenvp);
         
             perror("error: ");                      
             exit(EXIT_FAILURE);
         }
         else {
-            waitpid( 0, NULL, 0 );
-            scanf("%s", newargv[0] );
+            waitpid(0, NULL, 0);
+            scanf("%s", newargv[0]);
         }
     }
+
 }
 
 
-char * findPath( char * envPATH, char * commname ) {
+char * findPath(char * envPATH, char * commname) {
     
-    DIR * dirp;
-    struct dirent * dirstruct;
-    
+    FILE * fp;
     char * reqpath;
-    
     int ct = 0;
     int v = 0;
-    
+    int slashcount = 0;
     _Bool isBinary = false;
 
-    while( isBinary != true ) {
+    for(int index = 0; index < strlen(commname); index++)
+        if(commname[index] == chSLASH)
+            return commname;
+    
+    while(isBinary != true) {
         
-        reqpath = calloc( 1000, sizeof(char) );
-        while( envPATH[ct] != COLON ) {
+        reqpath = calloc(1000, sizeof(char));
+        while(envPATH[ct] != COLON) {
             reqpath[v] = envPATH[ct];
             ct++;
             v++;
         }
 
-        dirp = opendir( reqpath );
-        
-        if( dirp == NULL ) {
-            perror("error in opening one of env adresses: ");
-            exit(EXIT_FAILURE);
+        if(strlen(reqpath) + strlen(commname) + strlen(SLASH) + 1 <= PATH_MAX) {
+            strcat(reqpath, SLASH);
+            strncat(reqpath, commname, strlen(commname));
+        } else {
+            printf("%s has not enough size to concatenate %s\n", reqpath, commname);
+            return NULL;
         }
 
-        while( (dirstruct = readdir(dirp)) != NULL )
-            if( strcmp( commname, dirstruct->d_name ) == 0 )
-                isBinary = true;       
-
-        if( isBinary == true ) 
+        fp = fopen(reqpath, "r");
+        if(fp != NULL) {
+            isBinary = true;
             return reqpath;
-    
-        v = 0, ct++;
-
-        if( ct > strlen( envPATH) && isBinary != true )
-            return NULL;
+        }
         
+        v = 0, ct++;
         free(reqpath);
+    
     }
+    if(isBinary == false) 
+        return NULL;
+
 }
