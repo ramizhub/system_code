@@ -58,18 +58,22 @@
 #define BUFFMAX PATH_MAX
 
 char *findPath( char *envPATH, char *commname ) {
+    if(commname[0] == charSLASH)
+        return commname;
+    
     struct stat fstat;
     _Bool isBinary = false;
     char *reqpath;
     int ct = 0;
     int v = 0;
-    int slashcount = 0;
+    int coloncount = 1;
+    int loopindex = 0;
 
-    for(int i = 0; i < strlen(commname); i++)
-        if(commname[i] == charSLASH)
-            return commname;
+    for(int i = 0; i < strlen(envPATH); i++) 
+        if(envPATH[i] == COLON)
+            coloncount++;
 
-    while(isBinary != true) {
+    while(loopindex < coloncount) {
         reqpath = calloc(1000, sizeof(char));
         while(envPATH[ct] != COLON) {
             reqpath[v] = envPATH[ct];
@@ -81,7 +85,8 @@ char *findPath( char *envPATH, char *commname ) {
             strcat(reqpath, SLASH);
             strncat(reqpath, commname, strlen(commname));
         } else {
-            printf("%s has not enough size to concatenate %s\n", reqpath, commname);
+            fprintf(stderr, "Not enough memory to make %s file in %s directory adress", commname, reqpath);
+            free(reqpath);
             return NULL;
         }
 
@@ -89,11 +94,11 @@ char *findPath( char *envPATH, char *commname ) {
             isBinary = true;
             return reqpath;
         }  
-        v = 0, ct++;
+        
+        v = 0, ct++, loopindex++;
         free(reqpath);
     }
-    if(isBinary == false) 
-        return NULL;
+    return NULL;
 }
 
 int main(void) {
@@ -104,7 +109,7 @@ int main(void) {
     char *envPATH = getenv("PATH");
 
     if(envPATH == NULL) {
-        puts("getenv() couldn't find environment paths");
+        fprintf(stderr, "getenv() function couldn't find environment variable PATH");
         exit(EXIT_FAILURE);
     }
                    
@@ -118,12 +123,16 @@ int main(void) {
     int i = 0;
     memset(full_line, '\0', BUFFMAX);
     
-    while( (ch = getchar()) != '\n' ) 
+    while((ch = getchar()) != '\n') {
         full_line[i++] = ch;
-    i = 1;
+        if(i == sizeof(full_line)) {
+            fprintf(stderr, "Input limit exceeded.");
+            exit(EXIT_FAILURE);
+        }
+    }
 
-    while(sscanf(full_line + rdcount, "%s", tempp) != EOF 
-    && strcmp(tempp, "exit") != 0 && strcmp(tempp, "EXIT") != 0) {                               
+    i = 1;
+    while(sscanf(full_line + rdcount, "%s", tempp) != EOF && strcasecmp(full_line, "exit") != 0) {                               
         strncpy(ckcarray[0], tempp, strlen(tempp) + 1);
         
         rdcount += strlen(tempp) + 1;
@@ -141,19 +150,21 @@ int main(void) {
         reqpath = findPath(envPATH, newargv[0]);
         
         if(reqpath == NULL) {
-            puts("could not find requested command in the PATH. try again:\n");
+            fprintf(stderr, "%s: command not found", newargv[0]);
             exit(EXIT_FAILURE);
         }
-
+        
         pid = fork();
         if(pid == - 1) {
-            perror("error in fork function: ");
+            fprintf(stderr, "Internal fault");
+            perror(NULL);
             exit(EXIT_FAILURE);
         } 
         else if(pid == 0) {
             execve(reqpath, newargv, newenvp);
         
-            perror("error: ");                      
+            fprintf(stderr, "Can't execute your command.");
+            perror(NULL);                      
             exit(EXIT_FAILURE);
         }
         else {
@@ -163,10 +174,17 @@ int main(void) {
                 newargv[i] = NULL;
             i = 0;
             memset(full_line, '\0', BUFFMAX);
-            while((ch = getchar()) != '\n') 
-                full_line[i++] = ch;
             
+            while((ch = getchar()) != '\n') {
+                full_line[i++] = ch;
+                if(i == sizeof(full_line)) {
+                    fprintf(stderr, "Input limit exceeded.");
+                    exit(EXIT_FAILURE);
+                }
+            }
             rdcount = 0, i = 1, ckcount = 0;
         }
     }
+    free(tempp);
+    return 0;
 }
