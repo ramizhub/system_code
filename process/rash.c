@@ -186,7 +186,10 @@ int main(void) {
             exit(EXIT_FAILURE);
         }
         else {
-            waitpid(0, NULL, 0);                            /* We wan't to wait for running program by child process and then get ready for another iteration */
+            if(waitpid(0, NULL, 0) == -1) {                 /* We wan't to wait for running program by child process and then get ready for another iteration */
+                fprintf(stderr, "Internal fault");
+                exit(EXIT_FAILURE);
+            }
             
             for(i = 0; i < ckcount; i++) 
                 newargv[i] = NULL;                          /* Cleaning newargv[] for the next iteration to work with its own data. */
