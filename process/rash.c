@@ -3,8 +3,8 @@
     Programm was written in Ubuntu 20.04.3 LTS.
   
   ┌─────────────────────┐
-  │$: ./a.out           │
-  │[ ]                  │          main()
+  │uid@hostname@~cwd:   │
+  │./a.out              │          main()
   └─┬───────────────────┘          ┌──────────────────────────────────────────────────────┐
     │                              │                                                      │
     │                              │ RASH main function:                                  │
@@ -51,11 +51,44 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <pwd.h>
 
 #define SLASH "/"
 #define charSLASH '/'
 #define COLON ':'
 #define BUFFMAX PATH_MAX
+
+static unsigned int callShell(void) {
+    /*
+    * Effective user id that is converting to string
+    * Hostname 
+    * Current working directory. This is $: pwd or $pwd -L commands result
+    */
+    
+    struct passwd* pwdstat;
+    uid_t effid = geteuid();
+    if((pwdstat = getpwuid(effid)) == NULL) {                                           /* Calling effective user id */
+        perror("Can't get access to password database: ");
+        return 1;
+    }
+
+    char hostname[PATH_MAX];
+    if(gethostname(hostname, PATH_MAX) == -1) {                                         /* Calling hostname */
+        perror("Can't access hostname: ");
+        return 1;
+    } 
+
+    char currentwd[PATH_MAX];
+    if(getenv("PWD") == NULL) {
+        fprintf(stderr, "getenv() function couldn't find environment variable PWD");    /* Calling current working directory using environment variable PWD */
+        return 1;
+    }
+    strncpy(currentwd, getenv("PWD"), strlen(getenv("PWD")) + 1);
+    
+    
+    fprintf(stdout,"%s@%s:~%s:  ", pwdstat->pw_name, hostname, currentwd);              /* Calling terminal interface */
+    return 0;
+}
 
 static char *findPath( char *envPATH, char *commname ) {
     /*
@@ -81,14 +114,19 @@ static char *findPath( char *envPATH, char *commname ) {
         if(envPATH[i] == COLON)                             /* Colon couning */ 
             coloncount++;                                  
 
-    while(loopindex < coloncount) {
-        reqpath = calloc(1000, sizeof(char));              
-        while(envPATH[ct] != COLON) {                       /* Take bytes till colon meeting and work with resulting path */
+    reqpath = calloc(BUFFMAX, sizeof(char));  
+    while(loopindex < coloncount) {              
+        /*
+        * Take bytes till colon meeting or appeal outside memory and work with resulting path 
+        * I could some some different outside memory using like "ct!=strlen(envPATH)+1" but for me both of this cases show that we do useless work
+        * because reqpath is setting by null bytes every iteration and we don't want to set null byte in it again 
+        */
+        while(envPATH[ct] != COLON && ct != strlen(envPATH)+1) {     
             reqpath[v] = envPATH[ct];
             ct++;
             v++;
         }
-
+        
         if(strlen(reqpath) + strlen(commname) + strlen(SLASH) + 1 <= BUFFMAX) {
             strcat(reqpath, SLASH);
             strncat(reqpath, commname, strlen(commname));
@@ -104,8 +142,9 @@ static char *findPath( char *envPATH, char *commname ) {
         }  
         
         v = 0, ct++, loopindex++;
-        free(reqpath);
+        memset(reqpath, '\0', BUFFMAX);
     }
+    free(reqpath);
     return NULL;                                            /* We didn't find binary earlier so return NULL to main() function */
 }
 
@@ -117,7 +156,7 @@ int main(void) {
     char *envPATH = getenv("PATH");                         /* Get an environment variable */
 
     if(envPATH == NULL) {
-        fprintf(stderr, "getenv() function couldn't find environment variable PATH");                   /* Can't get environment variable */
+        fprintf(stderr, "getenv() function couldn't find environment variable PATH");                       /* Can't get environment variable */
         exit(EXIT_FAILURE);
     }
                    
@@ -131,9 +170,12 @@ int main(void) {
     int i = 0;                                              /* Just a supporting variable */
     memset(full_line, '\0', BUFFMAX);                       /* Cleaning array to avoid */
     
+    if(callShell() == 1) 
+        exit(EXIT_FAILURE);
+    
     while((ch = getchar()) != '\n') {                       /* User input moment. */
         full_line[i++] = ch;
-        if(i == sizeof(full_line)) {                        /* Edge case in which a huge number of characters are entered */
+        if(i == sizeof(full_line)-1) {                      /* Edge case in which a huge number of characters are entered */
             fprintf(stderr, "Input limit exceeded.");       
             exit(EXIT_FAILURE);
         }
@@ -168,7 +210,7 @@ int main(void) {
         reqpath = findPath(envPATH, newargv[0]);            /* newargv[0] first argument (asbolutepath/commandname) treatment */
         
         if(reqpath == NULL) {
-            fprintf(stderr, "%s: command not found", newargv[0]);
+            fprintf(stderr, "%s: command not found\n", newargv[0]);
             exit(EXIT_FAILURE);                             /* Dissability of findPath() to find your binary */
         }
 
@@ -196,9 +238,12 @@ int main(void) {
             i = 0;
             memset(full_line, '\0', BUFFMAX);               /* Cleaning commandline */
             
+            if(callShell() == 1) 
+                exit(EXIT_FAILURE);
+            
             while((ch = getchar()) != '\n') {
                 full_line[i++] = ch;
-                if(i == sizeof(full_line)) {
+                if(i == sizeof(full_line)-1) {
                     fprintf(stderr, "Input limit exceeded.");
                     exit(EXIT_FAILURE);
                 }
